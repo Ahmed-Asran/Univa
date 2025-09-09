@@ -8,3 +8,4 @@ Route::post('/users', [UserController::class, 'store'])->middleware(['api', 'aut
 Route::post('edit-user/{id}',[UserController::class, 'edit'])->middleware(['api', 'auth:sanctum', 'role:admin']);
 Route::post('delete-user/{id}',[UserController::class, 'delete'])->middleware(['api', 'auth:sanctum', 'role:admin']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout/{id}', [AuthController::class, 'logout'])->middleware(['api', 'auth:sanctum']);
