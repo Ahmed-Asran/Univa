@@ -11,6 +11,7 @@ use App\Models\Department;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\User\UserResource;
+use Mockery\Expectation;
 class UserService
 {
     protected function generateUserId($type)
@@ -164,7 +165,7 @@ class UserService
             $userWithRelations = $user->load('student', 'faculty', 'roles');
             Log::info("User created successfully with all relationships loaded");
             
-            return new UserResource($user->load('student'));
+            return new UserResource($user->load('student', 'faculty'));
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -173,4 +174,80 @@ class UserService
             throw $e;
         }
     }
+    public function update($id, $data)
+    {
+        DB::beginTransaction();
+        try{
+            $student=null;
+            $faculty=null;
+            $user = User::find($id);
+            if (!$user) {
+                throw new \Exception("User not found");
+            }
+            $username=$user->username;
+            if(strlen($username)==8){
+                $student=Student::where('student_id',$username)->first();
+            }
+            elseif(strlen($username)==6 && str_starts_with($username,'1')){
+                $faculty=Faculty::where('faculty_id',$username)->first();
+            }
+           $user->update(array_intersect_key($data, array_flip(['email'])));
+            if($student){
+                  $student->update(array_intersect_key($data, array_flip(['phone', 'address'])));
+            }
+            if($faculty){
+               $faculty->update(array_intersect_key($data, array_flip(['department', 'position'])));
+            }
+           
+            DB::commit();
+            Log::info("Transaction committed successfully");
+           return new UserResource($user->load('student', 'faculty'));
+        }catch(\Exception $e){
+            DB::rollBack();
+            Log::error('Error updating user: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            throw $e;
+        }
+           
+        
+    }
+    public function delete($id){
+       DB::beginTransaction();
+        try{
+            $student=null;
+            $faculty=null;
+            $user = User::find($id);
+            if (!$user) {
+                throw new \Exception("User not found");
+            }
+            $username=$user->username;
+            if(strlen($username)==8){
+                $student=Student::where('student_id',$username)->first();
+            }
+            elseif(strlen($username)==6 && str_starts_with($username,'1')){
+                $faculty=Faculty::where('faculty_id',$username)->first();
+            }
+           $user->update(['is_deleted'=>1]);
+            if($student){
+                  $student->update(['is_deleted'=>1]);
+            }
+            if($faculty){
+               $faculty->update(['is_deleted'=>1]);
+            }
+           
+            DB::commit();
+            Log::info("Transaction committed successfully");
+           return 'user deleted successfully';
+        }catch(\Exception $e){
+            DB::rollBack();
+            Log::error('Error updating user: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            throw $e;
+        }
+    }
+    
+
 }
+    
+
+

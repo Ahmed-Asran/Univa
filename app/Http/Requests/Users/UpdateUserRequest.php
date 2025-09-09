@@ -3,7 +3,10 @@
 namespace App\Http\Requests\Users;
 
 use Illuminate\Foundation\Http\FormRequest;
-
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 class UpdateUserRequest extends FormRequest
 {
     /**
@@ -11,7 +14,7 @@ class UpdateUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,12 +25,33 @@ class UpdateUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "name" => ["sometimes", "string", "max:255"],
-            "email" => ["sometimes", "string", "email", "max:255", "unique:users,email," . $this->user->id],
-            "phone" => ["nullable", "string", "max:15"], // Ensure phone number is a string and has a maximum length of 15 characters
-            "address" => ["nullable", "string", "max:255"], // Ensure address is a string and has a maximum length of 255 characters
-            "position"=>["nullable", "string", "max:255"], // Ensure position is a string and has a maximum length of 255 characters
-            "department"=>["nullable", "string", "max:255"], // Ensure department is a string and has a maximum length of 255
+            "email" => ["sometimes", "string", "email", "max:255",Rule::unique('users', 'email')->ignore($this->route('id'), 'user_id'),],
+            "phone" => ["nullable", "string", "max:15", "unique:users,phone," . $this->user_id], 
+            "address" => ["nullable", "string", "max:255"], 
+            "position"=>["nullable", "string", "max:255"], 
+            "department"=>["nullable", "string", "max:255","exists:departments,id"], 
         ];
     }
+    public function messages(){
+        return [
+            "email.unique"=>"A user with this email already exists.",
+            "phone.unique"=>"A student with this phone number already exists."
+        ];
+    }
+    protected function passedValidation()
+{
+    log::info('Validation passed for CreateUserRequest', $this->validated());
+}
+protected function failedValidation(Validator $validator)
+{
+    log::warning('Validation failed for CreateUserRequest', [
+        'errors' => $validator->errors()->all(),
+        'input' => $this->all()
+    ]);
+
+    throw new HttpResponseException(response()->json([
+        'message' => $validator->errors()->first()
+    ], 422));
+}
+
 }

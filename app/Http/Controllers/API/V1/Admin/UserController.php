@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\UserService;
 use App\Http\Requests\Users\CreateUserRequest;
+use App\Http\Requests\Users\UpdateUserRequest;
 use App\Http\Resources\User\UserResource;
 use Illuminate\Support\Facades\Log;
 
@@ -37,4 +38,29 @@ class UserController extends Controller
         
     }
 }
+    public function edit(UpdateUserRequest $request, $id)
+    {
+        log::info('Updating a user');
+        $data = $request->validated();
+        try{
+            $user = $this->userService->update($id,$data);
+            return new UserResource($user);
+        }catch(\Exception $e){
+            Log::error('Error updating user: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+
+    }
+    public function delete($userId)
+    {
+        log::info('Deleting a user');
+        try{
+            $this->userService->delete($userId);
+            return response()->json(['message' => 'User deleted successfully'], 200);
+        }catch(\Exception $e){
+            Log::error('Error deleting user: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
 }
+
