@@ -44,6 +44,7 @@ class Student extends Model
 	];
 
 	protected $fillable = [
+		'student_id',
 		'user_id',
 		'phone',
 		'address',
@@ -55,7 +56,7 @@ class Student extends Model
 
 	public function user()
 	{
-		return $this->belongsTo(User::class);
+		return $this->belongsTo(User::class,'user_id','user_id');
 	}
 
 	public function assignment_submissions()

@@ -34,7 +34,9 @@ class UserRole extends Model
 	];
 
 	protected $fillable = [
-		'assigned_at'
+		'assigned_at',
+		'user_id',
+		'role_id'	
 	];
 
 	public function user()
