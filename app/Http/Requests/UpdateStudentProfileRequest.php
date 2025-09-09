@@ -1,21 +1,29 @@
 <?php
 
-namespace App\Http\Requests\Users;
+namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\Rule;
-class UpdateUserRequest extends FormRequest
+
+class UpdateStudentProfileRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true;
+        $user = $this->user(); // same as auth()->user()
+        $routeId = $this->route('id'); // {id} from the route
+        if($user->hasRole('student') && $user->user_id == $routeId){
+            return true;
+        }
+        return false;
+        
     }
+
 
     /**
      * Get the validation rules that apply to the request.
@@ -25,29 +33,27 @@ class UpdateUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "email" => ["sometimes", "string", "email", "max:255",Rule::unique('users', 'email')->ignore($this->route('id'), 'user_id'),],
             'phone' => [
             'sometimes','string',
             Rule::unique('students','phone')->ignore($this->student_id, 'id')
         ],
-            "address" => ["nullable", "string", "max:255"], 
-            "position"=>["nullable", "string", "max:255"], 
-            "department"=>["nullable", "string", "max:255","exists:departments,id"], 
+            "address" => ["sometimes", "string", "max:255"],
+          'email' => [
+            'sometimes',
+            'string',
+            'email',
+            'max:255',
+            Rule::unique('users', 'email')->ignore($this->user_id, 'user_id'),
+        ], 
         ];
     }
-    public function messages(){
-        return [
-            "email.unique"=>"A user with this email already exists.",
-            "phone.unique"=>"A student with this phone number already exists."
-        ];
-    }
-    protected function passedValidation()
+      protected function passedValidation()
 {
     log::info('Validation passed for CreateUserRequest', $this->validated());
 }
 protected function failedValidation(Validator $validator)
 {
-    log::warning('Validation failed for CreateUserRequest', [
+    log::warning('Validation failed for update profile', [
         'errors' => $validator->errors()->all(),
         'input' => $this->all()
     ]);
@@ -56,5 +62,12 @@ protected function failedValidation(Validator $validator)
         'message' => $validator->errors()->first()
     ], 422));
 }
-
+protected function failedAuthorization(){
+    log::warning('Failed authorization for update profile', [
+        'input' => $this->all()
+    ]);
+    throw new HttpResponseException(response()->json([
+        'message' => 'You are not authorized to perform this action'
+    ], 401));
+}
 }
