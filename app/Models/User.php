@@ -9,7 +9,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-
+use Laravel\Sanctum\HasApiTokens; 
 /**
  * Class User
  * 
@@ -39,6 +39,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class User extends Model
 {
+	 use HasApiTokens;
 	protected $table = 'users';
 	protected $primaryKey = 'user_id';
 
@@ -88,7 +89,7 @@ class User extends Model
 
 	public function faculty()
 	{
-		return $this->hasOne(Faculty::class);
+		return $this->hasOne(Faculty::class,'user_id','user_id');
 	}
 
 	public function notifications()
@@ -103,12 +104,16 @@ class User extends Model
 
 	public function student()
 	{
-		return $this->hasOne(Student::class);
+		return $this->hasOne(Student::class,'user_id','user_id');
 	}
 
 	public function roles()
 	{
-		return $this->belongsToMany(Role::class, 'user_roles')
-					->withPivot('assigned_at');
+		return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id')
+				->withPivot('assigned_at');
 	}
+	public function hasRole($roleName): bool
+{
+    return $this->roles->contains('role_name', $roleName);
+}
 }
