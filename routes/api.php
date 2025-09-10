@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\V1\Admin\Coursecontroller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\V1\Admin\UserController;
@@ -14,3 +15,8 @@ Route::post('/logout/{id}', [AuthController::class, 'logout'])->middleware(['api
 Route::post('/forget-password', [PasswardResetController::class, 'forget']);
 Route::post('/reset-password', [PasswardResetController::class, 'reset']);
 Route::post('/edit-profile/{id}', [ProfileContoller::class, 'update'])->middleware(['api', 'auth:sanctum', 'role:student']);
+Route::post('/course-create',[Coursecontroller::class,'store'])->middleware(['api','auth:sanctum','role:admin']);
+ Route::get('/courses',[Coursecontroller::class,'index'])->middleware(['api','auth:sanctum','role:admin']);
+ Route::get('/courses/{id}',[Coursecontroller::class,'show'])->middleware(['api','auth:sanctum']);
+ Route::post('/course-update/{id}',[Coursecontroller::class,'update'])->middleware(['api','auth:sanctum','role:admin']);
+ Route::post('/course-delete/{id}',[Coursecontroller::class,'destroy'])->middleware(['api','auth:sanctum','role:admin']);

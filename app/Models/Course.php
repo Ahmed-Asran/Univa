@@ -62,7 +62,7 @@ class Course extends Model
 
 	public function course_prerequisites()
 	{
-		return $this->hasMany(CoursePrerequisite::class, 'prerequisite_course_id');
+		return $this->hasMany(CoursePrerequisite::class, 'course_id', 'course_id');
 	}
 
 	public function course_sections()
