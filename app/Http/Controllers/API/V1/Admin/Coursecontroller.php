@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\V1\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Courses\CreateCourseRequest;
+use App\Http\Requests\Courses\UpdatecourseRequest;
 use App\Http\Resources\Course\CourseResource;
 use App\Services\CourseService;
 use App\Models\Course;
@@ -33,7 +34,7 @@ class Coursecontroller extends Controller
         $course = $this->courseService->getCourseById($id);
         return new CourseResource($course);
     }  
-    public function update(Request $request, $id)
+    public function update(UpdatecourseRequest $request, $id)
     {
         $data = $request->all();
         $course = $this->courseService->updateCourse($id, $data);
