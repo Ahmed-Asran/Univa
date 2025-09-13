@@ -2,6 +2,9 @@
 namespace App\Services;
 use App\Models\Course;
 use Illuminate\Support\Facades\Log as log;
+use App\Models\CourseSection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Exceptions\HttpResponseException;
 class CourseService
 {
     public function createCourse( $data)
@@ -99,6 +102,74 @@ class CourseService
         $course->is_active = 0;
         $course->save();
         return true;
+    }
+    public function createCourseSection($data)
+    {
+        DB::beginTransaction();
+        try {
+        $courseSection = CourseSection::create([
+            'course_id' => $data['course_id'],
+            'term_id' => $data['term_id'],
+            'faculty_id' => $data['faculty_id'],
+            'section_number' => $data['section_number'],
+            'content' => $data['content'] ?? null,
+        ]);
+        DB::commit();
+        return $courseSection;
+        
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new HttpResponseException(response()->json([
+                ['message' => 'create course section failed']
+            ], 400));
+        }
+    }
+    public function getAllCourseSections()
+    {
+        return CourseSection::where(['is_deleted' => 0])->get();
+    }
+    public function getCourseSectionById($id)
+    {
+        $courseSection = CourseSection::find($id);
+        if (!$courseSection) {
+            throw new \Exception('Course Section not found');
+        }
+        if ($courseSection->is_deleted) {
+            throw new \Exception('Course Section is inactive or deleted');
+        }
+        return $courseSection;
+    }public function updateCourseSection($id, $data)
+    {
+        $courseSection = CourseSection::find($id);
+        if (!$courseSection) {
+            throw new \Exception('Course Section not found');
+        }
+
+        $courseSection->update([
+            'course_id' => $data['course_id'] ?? $courseSection->course_id,
+            'term_id' => $data['term_id'] ?? $courseSection->term_id,
+            'faculty_id' => $data['faculty_id'] ?? $courseSection->faculty_id,
+            'section_number' => $data['section_number'] ?? $courseSection->section_number,
+            'content' => $data['content'] ?? $courseSection->content,
+        ]);
+
+        return $courseSection;
+    }
+    public function deleteCourseSection($id)
+    {
+        $courseSection = CourseSection::find($id);
+        if (!$courseSection) {
+            throw new \Exception('Course Section not found');
+        }
+        $courseSection->is_deleted = 1;
+        $courseSection->save();
+        return true;
+    }
+    public function getSectionsCurrent()
+    {
+       return CourseSection::where(['is_deleted' => 0])
+        ->whereHas('academic_term', fn($query) => $query->where('is_current', 1))
+        ->get();
     }
 
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\V1\Admin\Coursecontroller;
+use App\Http\Controllers\API\V1\Admin\CourseSectionControoler;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\V1\Admin\UserController;
@@ -20,3 +21,9 @@ Route::post('/course-create',[Coursecontroller::class,'store'])->middleware(['ap
  Route::get('/courses/{id}',[Coursecontroller::class,'show'])->middleware(['api','auth:sanctum']);
  Route::post('/course-update/{id}',[Coursecontroller::class,'update'])->middleware(['api','auth:sanctum','role:admin']);
  Route::post('/course-delete/{id}',[Coursecontroller::class,'destroy'])->middleware(['api','auth:sanctum','role:admin']);
+ Route::post('course-section-create',[CourseSectionControoler::class,'store'])->middleware(['api','auth:sanctum','role:admin']);
+ Route::get('course-sections',[CourseSectionControoler::class,'index'])->middleware(['api','auth:sanctum','role:admin']);
+Route::get('course-section/{id}',[CourseSectionControoler::class,'show'])->middleware(['api','auth:sanctum','role:admin']);
+Route::post('course-section-update/{id}',[CourseSectionControoler::class,'update'])->middleware(['api','auth:sanctum','role:admin']);
+Route::post('course-section-delete/{id}',[CourseSectionControoler::class,'destroy'])->middleware(['api','auth:sanctum','role:admin']);
+Route::get('course-sections-current',[CourseSectionControoler::class,'currentSections'])->middleware(['api','auth:sanctum','role:admin']);
