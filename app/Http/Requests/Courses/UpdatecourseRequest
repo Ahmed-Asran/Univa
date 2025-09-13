@@ -26,7 +26,7 @@ class UpdatecourseRequest extends FormRequest
         return [
             "course_name" => "sometimes|string|max:255|unique:courses,course_name",
             "course_code" => "sometimes|string|max:5|unique:courses,course_code",
-            "description" => "sometimes|string",
+            "description" => "sometimes|nullable|string",
             "credit_hours" => "sometimes|integer|min:0|max:3",
             'prerequisites' => 'sometimes|array|exists:courses,course_id',
         ];
@@ -51,11 +51,15 @@ class UpdatecourseRequest extends FormRequest
     }
     protected function prepareForValidation(): void
     {
-        $this->merge([
-            'course_name' => trim($this->course_name),
-            'course_code' => strtoupper(trim($this->course_code)),
-            'description' => $this->description ? trim($this->description) : null,
-        ]);
+        if ($this->has('course_name')) {
+            $this->merge(['course_name' => trim($this->course_name)]);
+        }
+        if ($this->has('course_code')) {
+            $this->merge(['course_code' => strtoupper(trim($this->course_code))]);    
+        }
+        if ($this->has('description')) {
+            $this->merge(['description' => trim($this->description)]);
+        }
     }
     protected function failedAuthorization()
     {
