@@ -40,6 +40,11 @@ class UpdateCourseSerctionRequest extends FormRequest
 
             "section_number" => "sometimes|string",
             'content' => 'nullable|string',
+            'schedule' => 'sometimes|array',
+                'schedule.*.day' => 'required_with:schedule|string|in:Saturday,Sunday,Monday,Tuesday,Wednesday,Thursday,Friday',
+                'schedule.*.start_time' => 'required_with:schedule|date_format:H:i',
+                'schedule.*.end_time'   => 'required_with:schedule|date_format:H:i|after:schedule.*.start_time',
+                'schedule.*.classroom' => 'nullable|string',
         ];
     }
     public function messages(): array

@@ -1,5 +1,7 @@
 <?php
 namespace App\Services;
+
+use App\Models\ClassSchedule;
 use App\Models\Course;
 use Illuminate\Support\Facades\Log as log;
 use App\Models\CourseSection;
@@ -114,13 +116,25 @@ class CourseService
             'section_number' => $data['section_number'],
             'content' => $data['content'] ?? null,
         ]);
+        log::info($data['schedule']);
+        foreach($data['schedule'] as $schedule){
+            ClassSchedule::create([
+                'section_id' => $courseSection->section_id,
+                'day_of_week'=>$schedule['day'],
+                'start_time'=>$schedule['start_time'],
+                'end_time'=>$schedule['end_time'],
+                'classroom'=>$schedule['classroom'] ?? null,
+            ]);
+        }
+        log::info('created course section class schedules');
+       
         DB::commit();
         return $courseSection;
         
         } catch (\Exception $e) {
             DB::rollBack();
             throw new HttpResponseException(response()->json([
-                ['message' => 'create course section failed']
+                ['message' => $e->getMessage()]
             ], 400));
         }
     }
@@ -138,23 +152,41 @@ class CourseService
             throw new \Exception('Course Section is inactive or deleted');
         }
         return $courseSection;
-    }public function updateCourseSection($id, $data)
-    {
-        $courseSection = CourseSection::find($id);
-        if (!$courseSection) {
-            throw new \Exception('Course Section not found');
-        }
-
-        $courseSection->update([
-            'course_id' => $data['course_id'] ?? $courseSection->course_id,
-            'term_id' => $data['term_id'] ?? $courseSection->term_id,
-            'faculty_id' => $data['faculty_id'] ?? $courseSection->faculty_id,
-            'section_number' => $data['section_number'] ?? $courseSection->section_number,
-            'content' => $data['content'] ?? $courseSection->content,
-        ]);
-
-        return $courseSection;
     }
+   public function updateCourseSection($id, $data)
+{
+    $courseSection = CourseSection::find($id);
+    if (!$courseSection) {
+        throw new \Exception('Course Section not found');
+    }
+
+    // Update section base fields
+    $courseSection->update([
+        'course_id'      => $data['course_id'] ?? $courseSection->course_id,
+        'term_id'        => $data['term_id'] ?? $courseSection->term_id,
+        'faculty_id'     => $data['faculty_id'] ?? $courseSection->faculty_id,
+        'section_number' => $data['section_number'] ?? $courseSection->section_number,
+        'content'        => $data['content'] ?? $courseSection->content,
+    ]);
+
+    if (isset($data['schedule']) && is_array($data['schedule'])) {
+        // delete all old schedules
+        $courseSection->class_schedules()->delete();
+
+        // insert new schedules
+        foreach ($data['schedule'] as $s) {
+            $courseSection->class_schedules()->create([
+                'day_of_week' => $s['day'] ?? $s['day_of_week'],
+                'start_time'  => $s['start_time'],
+                'end_time'    => $s['end_time'],
+                'classroom'   => $s['classroom'] ?? null,
+            ]);
+        }
+    }
+
+    return $courseSection->load('class_schedules');
+}
+
     public function deleteCourseSection($id)
     {
         $courseSection = CourseSection::find($id);

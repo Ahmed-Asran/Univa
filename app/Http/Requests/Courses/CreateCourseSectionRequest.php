@@ -44,6 +44,11 @@ class CreateCourseSectionRequest extends FormRequest
 
             "section_number" => "required|string",
             'content' => 'nullable|string',
+             'schedule' => 'required|array',
+                'schedule.*.day' => 'required|string|in:Saturday,Sunday,Monday,Tuesday,Wednesday,Thursday,Friday',
+                'schedule.*.start_time' => 'required|date_format:H:i',
+                'schedule.*.end_time'   => 'required|date_format:H:i|after:schedule.*.start_time',
+                'schedule.*.classroom' => 'nullable|string',
         ];
     }
     public function messages(): array
@@ -58,6 +63,16 @@ class CreateCourseSectionRequest extends FormRequest
             "section_number.required" => "Section number is required.",
             "section_number.string" => "Section number must be a string.",
             "content.string" => "Content must be a string.",
+            "schedule.required" => "Schedule is required.",
+            "schedule.array" => "Schedule must be an array.",
+            "schedule.*.day.required" => "Day is required.",
+            "schedule.*.day.in" => "Day must be a valid day.",
+            "schedule.*.start_time.required" => "Start time is required.",
+            "schedule.*.start_time.date_format" => "Start time must be in the format HH:MM.",
+            "schedule.*.end_time.required" => "End time is required.",
+            "schedule.*.end_time.date_format" => "End time must be in the format HH:MM.",
+            "schedule.*.end_time.after" => "End time must be after start time.",
+            "classroom.string" => "Classroom must be a string."
         ];
     }
 
