@@ -56,4 +56,34 @@ class MaterialController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+    public function getMaterials($sectionId)
+    {
+        $section=CourseSection::find($sectionId);
+        if (!auth()->check() || !auth()->user()->hasRole('faculty')||$section->faculty_id != auth()->user()->username) {
+            return response()->json(['error' => ' you are Unauthorized'], 401);
+        }
+        log::info('Get materials request received', ['section_id' => $sectionId]);
+        try {
+            $materials = $this->matrailUploadfile->getMaterialsBySection($sectionId);
+            log::info('Materials retrieved', ['count' => count($materials)]);
+            return response()->json(['data' => $materials], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+    public function getMaterial($materialId)
+    {
+        log::info('Get material request received', ['material_id' => $materialId]);
+        try {
+            $material = $this->matrailUploadfile->getMaterialById($materialId);
+            if (!$material) {
+                log::warning('Material not found', ['material_id' => $materialId]);
+                return response()->json(['error' => 'Material not found'], 404);
+            }
+            log::info('Material retrieved', ['material' => $material]);
+            return response()->json(['data' => $material], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 }

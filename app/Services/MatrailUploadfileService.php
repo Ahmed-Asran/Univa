@@ -60,4 +60,40 @@ class MatrailUploadfileService
         }
        
     }
+    public function getMaterialsBySection($sectionId)
+    {
+        try {
+            log::info('Fetching materials for section', ['section_id' => $sectionId]);
+            $materials = CourseMaterial::where('section_id', $sectionId)->get();
+            log::info('Materials fetched successfully', ['count' => $materials->count()]);
+            return $materials;
+        } catch (\Exception $e) {
+            log::error('Database error: ' . $e->getMessage());
+            throw new \Exception('Failed to fetch materials');
+        }
+    }
+    public function getAssignmentsBySection($sectionId)
+    {
+        try {
+            log::info('Fetching assignments for section', ['section_id' => $sectionId]);
+            $assignments = Assignment::where('section_id', $sectionId)->get();
+            log::info('Assignments fetched successfully', ['count' => $assignments->count()]);
+            return $assignments;
+        } catch (\Exception $e) {
+            log::error('Database error: ' . $e->getMessage());
+            throw new \Exception('Failed to fetch assignments');
+        }
+    }
+    public function getMaterialById($materialId)
+    {
+        try {
+            log::info('Fetching material by ID', ['material_id' => $materialId]);
+            $material = CourseMaterial::findOrFail($materialId);
+            log::info('Material fetched successfully', ['material' => $material]);
+            return $material;
+        } catch (\Exception $e) {
+            log::error('Database error: ' . $e->getMessage());
+            throw new \Exception('Failed to fetch material');
+        }
+    }
 }
