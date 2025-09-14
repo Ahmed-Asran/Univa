@@ -8,6 +8,7 @@ use App\Http\Controllers\API\V1\Admin\UserController;
 use App\Http\Controllers\API\V1\Auth\AuthController;
 use App\Http\Controllers\API\V1\Auth\PasswardResetController;
 use App\Http\Controllers\API\V1\Student\ProfileContoller;
+use App\Http\Controllers\API\V1\Faculty\MaterialController;
 Route::post('/users', [UserController::class, 'store'])->middleware(['api', 'auth:sanctum', 'role:admin']);
 Route::post('edit-user/{id}',[UserController::class, 'edit'])->middleware(['api', 'auth:sanctum', 'role:admin']);
 Route::post('delete-user/{id}',[UserController::class, 'delete'])->middleware(['api', 'auth:sanctum', 'role:admin']);
@@ -27,3 +28,4 @@ Route::get('course-section/{id}',[CourseSectionControoler::class,'show'])->middl
 Route::post('course-section-update/{id}',[CourseSectionControoler::class,'update'])->middleware(['api','auth:sanctum','role:admin']);
 Route::post('course-section-delete/{id}',[CourseSectionControoler::class,'destroy'])->middleware(['api','auth:sanctum','role:admin']);
 Route::get('course-sections-current',[CourseSectionControoler::class,'currentSections'])->middleware(['api','auth:sanctum','role:admin']);
+Route::post('courses/material-upload',[MaterialController::class,'uploadMaterial'])->middleware(['api','auth:sanctum','role:faculty']);
