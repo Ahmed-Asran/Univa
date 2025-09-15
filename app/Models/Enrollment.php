@@ -53,7 +53,7 @@ class Enrollment extends Model
 
 	public function student()
 	{
-		return $this->belongsTo(Student::class);
+		return $this->belongsTo(Student::class,'student_id');
 	}
 
 	public function course_section()
@@ -75,4 +75,8 @@ class Enrollment extends Model
 	{
 		return $this->hasMany(Grade::class);
 	}
+	public function section()
+{
+    return $this->belongsTo(CourseSection::class, 'section_id', 'section_id');
+}
 }

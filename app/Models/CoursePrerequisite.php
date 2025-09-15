@@ -37,7 +37,7 @@ class CoursePrerequisite extends Model
 
 	public function course()
 	{
-		return $this->belongsTo(Course::class, 'prerequisite_course_id','course_id');
+		return $this->belongsTo(Course::class, 'couse_id','course_id');
 	}
 	 public function prerequisiteCourse()
     {
