@@ -90,7 +90,7 @@ class CreateEnrollmentService
                 
 
                 // ✅ Create enrollment
-                $created = Enrollment::create([
+                $enrollment = Enrollment::create([
                     'student_id'       => $student->student_id,
                     'section_id'       => $section->section_id,
                     'enrollment_date'  => $enrol['enrollment_date']?? now(),
@@ -99,7 +99,10 @@ class CreateEnrollmentService
                     'result'           => $enrol['result'] ?? null,
                 ]);
                 $section->increment('current_enrollment'); // Increment enrolled count
-            }
+                // Eager-load relationships for the resource
+                 $enrollment->load('course_section.course.course_prerequisites', 'course_section.academic_term');
+                 $created[] = $enrollment;
+                }
 
             return $created;
         });

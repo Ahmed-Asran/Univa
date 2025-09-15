@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Enrollment;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use App\Http\Resources\Course\EnrollmentResource;
 
 class CreateEnrollmentController extends Controller
 {
@@ -22,10 +23,13 @@ class CreateEnrollmentController extends Controller
         $studentId = $request->user()->student->student_id; // Assuming the student ID is the authenticated user's ID
         log::info('Fetching available enrollments...');
        $availableEnrollments = $this->enrollmentService->showAvailableEnrollments($studentId);
-        return response()->json([
-            'message' => 'Available enrollments fetched successfully.',
-            'data' => $availableEnrollments
-        ], 200);
+    //    return response()->json([
+    //        'message' => 'Available enrollments fetched successfully.',
+    //        'data' => $availableEnrollments
+    //    ], 200);
+    return EnrollmentResource::collection($availableEnrollments)
+    ->additional(['message' => 'Available enrollments fetched successfully']);
+    
     }
     public function store(CraeteEnrollmentRequest $request)
     {
@@ -44,11 +48,15 @@ class CreateEnrollmentController extends Controller
             $data = $request->validated();
             $enrollments = $this->enrollmentService->createEnrollments($data['enrolments']);
 
-            return response()->json([
-                'success' => true,
-                'data'    => $enrollments,
-                'message' => 'Enrollments created successfully',
-            ], 201);
+            // return response()->json([
+            //     'success' => true,
+            //     'data'    => $enrollments,
+            //     'message' => 'Enrollments created successfully',
+            // ], 201);
+            log::info('Returning enrollment resources');
+           return EnrollmentResource::collection($enrollments)
+                ->additional(['message' => 'Enrollments created successfully'])
+                ->response()->setStatusCode(201);
 
         } catch (Exception $e) {
             return response()->json([
