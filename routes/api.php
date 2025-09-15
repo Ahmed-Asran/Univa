@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\V1\Admin\Coursecontroller;
 use App\Http\Controllers\API\V1\Admin\CourseSectionControoler;
+use App\Http\Controllers\API\V1\Student\CreateEnrollmentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\V1\Admin\UserController;
@@ -31,3 +32,5 @@ Route::get('course-sections-current',[CourseSectionControoler::class,'currentSec
 Route::post('courses/material-upload',[MaterialController::class,'uploadMaterial'])->middleware(['api','auth:sanctum','role:faculty']);
 Route::get('courses/materials/{sectionId}',[MaterialController::class,'getMaterials'])->middleware(['api','auth:sanctum','role:faculty,student']);
 Route::get('courses/material/{materialId}',[MaterialController::class,'getMaterial'])->middleware(['api','auth:sanctum','role:faculty,student']);
+Route::get('course/enrollments',[CreateEnrollmentController::class,'index'])->middleware(['api','auth:sanctum','role:student']);
+Route::post('course/enrollments',[CreateEnrollmentController::class,'store'])->middleware(['api','auth:sanctum','role:student']);
