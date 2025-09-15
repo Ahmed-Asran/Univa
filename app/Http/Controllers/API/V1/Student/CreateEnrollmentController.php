@@ -65,5 +65,70 @@ class CreateEnrollmentController extends Controller
             ], 400);
         }
     }
+    public function updateEnrollments(CraeteEnrollmentRequest $request)
+    {
+       $authStudentId = $request->user()->student->student_id;
+    $enrollmentsData = $request->input('enrolments', []);
 
+    // Authorization: prevent updating for another student
+    foreach ($enrollmentsData as $enrol) {
+        if ($enrol['student_id'] != $authStudentId) {
+            return response()->json([
+                'message' => 'You are not authorized to update other students\' enrollments.'
+            ], 403);
+        }
+    }
+
+    if (empty($enrollmentsData)) {
+        return response()->json([
+            'message' => 'No enrollments provided for update.'
+        ], 400);
+    }
+
+    //  Extract all section_ids from request
+    $newSectionIds = collect($enrollmentsData)->pluck('section_id')->toArray();
+
+    try {
+        DB::beginTransaction();
+
+        $updatedEnrollments = $this->enrollmentService->updateEnrollments($authStudentId, $newSectionIds);
+
+        DB::commit();
+
+        return EnrollmentResource::collection($updatedEnrollments)
+            ->additional(['message' => 'Enrollments updated successfully'])
+            ->response()->setStatusCode(200);
+
+    } catch (Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage(),
+        ], 400);
+        }
+    }
+    public function showallEnrollments(Request $request,$studentId)
+    {
+        log::info('Fetching all enrollments for student ID: ' . $studentId);
+        if($studentId != $request->user()->student->student_id) {
+            return response()->json([
+                'message' => 'You are not authorized to view other students\' enrollments.'
+            ], 403);
+        }
+       $allEnrollments = $this->enrollmentService->showallEnrollments($studentId);
+       return EnrollmentResource::collection($allEnrollments)
+       ->additional(['message' => 'All enrollments fetched successfully']);
+}
+    public function showCurrentEnrollments(Request $request,$studentId)
+    {
+        log::info('Fetching current enrollments for student ID: ' . $studentId);
+        if($studentId != $request->user()->student->student_id) {
+            return response()->json([
+                'message' => 'You are not authorized to view other students\' enrollments.'
+            ], 403);
+        }
+       $currentEnrollments = $this->enrollmentService->showCurrentEnrollments($studentId);
+       return EnrollmentResource::collection($currentEnrollments)
+       ->additional(['message' => 'Current enrollments fetched successfully']);
+    }
 }

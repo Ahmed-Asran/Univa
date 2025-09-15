@@ -75,4 +75,8 @@ class Enrollment extends Model
 	{
 		return $this->hasMany(Grade::class);
 	}
+	public function section()
+{
+    return $this->belongsTo(CourseSection::class, 'section_id', 'section_id');
+}
 }

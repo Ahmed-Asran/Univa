@@ -34,3 +34,6 @@ Route::get('courses/materials/{sectionId}',[MaterialController::class,'getMateri
 Route::get('courses/material/{materialId}',[MaterialController::class,'getMaterial'])->middleware(['api','auth:sanctum','role:faculty,student']);
 Route::get('course/enrollments',[CreateEnrollmentController::class,'index'])->middleware(['api','auth:sanctum','role:student']);
 Route::post('course/enrollments',[CreateEnrollmentController::class,'store'])->middleware(['api','auth:sanctum','role:student']);
+Route::put('course/enrollments',[CreateEnrollmentController::class,'updateEnrollments'])->middleware(['api','auth:sanctum','role:student']);
+Route::get('course/all-enrollments/{Studentid}',[CreateEnrollmentController::class,'showallEnrollments'])->middleware(['api','auth:sanctum','role:student']);
+Route::get('course/current-enrollments/{Studentid}',[CreateEnrollmentController::class,'showCurrentEnrollments'])->middleware(['api','auth:sanctum','role:student']);

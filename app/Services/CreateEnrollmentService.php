@@ -89,7 +89,7 @@ class CreateEnrollmentService
                 }
                 
 
-                // ✅ Create enrollment
+                // Create enrollment
                 $enrollment = Enrollment::create([
                     'student_id'       => $student->student_id,
                     'section_id'       => $section->section_id,
@@ -107,4 +107,64 @@ class CreateEnrollmentService
             return $created;
         });
     }
+public function updateEnrollments($studentId, array $newSectionIds)
+{
+    $student = Student::findOrFail($studentId);
+
+    // 1) Fetch eligible sections
+    $eligibleSections = $this->showAvailableEnrollments($studentId)->pluck('section_id')->toArray();
+
+    // 2) Validate new sections against eligibility
+    foreach ($newSectionIds as $sectionId) {
+        if (!in_array($sectionId, $eligibleSections)) {
+            throw new Exception("Section $sectionId is not eligible for enrollment");
+        }
+    }
+
+    // 3) Current enrollments
+    $currentSectionIds = $student->enrollments()->pluck('section_id')->toArray();
+
+    // 4) Determine what to add and what to remove
+    $toAdd = array_diff($newSectionIds, $currentSectionIds);
+    $toRemove = array_diff($currentSectionIds, $newSectionIds);
+
+    // 5) Remove dropped enrollments
+    Enrollment::where('student_id', $studentId)
+        ->whereIn('section_id', $toRemove)
+        ->delete();
+
+    // 6) Add new enrollments
+    foreach ($toAdd as $sectionId) {
+        Enrollment::create([
+            'student_id' => $studentId,
+            'section_id' => $sectionId,
+        ]);
+    }
+
+    // 7) Return updated list with resource
+    $updatedEnrollments = $student->enrollments()->with(['section.course', 'section.academic_term'])->get();
+    return $updatedEnrollments;
+}
+public function showallEnrollments($studentId)
+{
+    $student = Student::findOrFail($studentId);
+    return $student->enrollments()->with(['section.course', 'section.academic_term'])->get();
+
+}
+public function showCurrentEnrollments($studentId)
+{
+    $student = Student::findOrFail($studentId);
+    $currentTerm = AcademicTerm::where('is_current', 1)->first();
+
+    if (!$currentTerm) {
+        throw new Exception('No active term found.');
+    }
+
+    return $student->enrollments()
+        ->whereHas('section', function ($query) use ($currentTerm) {
+            $query->where('term_id', $currentTerm->term_id);
+        })
+        ->with(['section.course', 'section.academic_term'])
+        ->get();
+}
 }
