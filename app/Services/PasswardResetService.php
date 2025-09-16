@@ -33,9 +33,10 @@ class PasswardResetService
         //     $message->to($user->email)->subject('Reset Password');
         // });
             Mail::raw("Use this token to reset your password: $token", function ($message) use ($user) {
-            $message->to($user->email)
-                    ->subject('Reset Password');
-        });
+    $message->to($user->email)
+            ->subject('Reset Password');
+});
+        
 
         return [$token];
     }
@@ -43,7 +44,7 @@ class PasswardResetService
     public function resetPass($token, $password, $email)
     {
         $tokenRow = PasswordResetToken::where('token', $token)->first();
-        if (!$tokenRow|| !$tokenRow->used|| $tokenRow->expires_at->isPast() ){
+        if (!$tokenRow|| $tokenRow->used|| $tokenRow->expires_at->isPast() ){
             return "invalid token";
         }
 
