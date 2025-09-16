@@ -127,7 +127,10 @@ public function updateEnrollments($studentId, array $newSectionIds)
     // 4) Determine what to add and what to remove
     $toAdd = array_diff($newSectionIds, $currentSectionIds);
     $toRemove = array_diff($currentSectionIds, $newSectionIds);
-
+    $sections= CourseSection::whereIn('section_id', $toRemove)->get();
+    foreach ($sections as $section) {
+        $section->decrement('current_enrollment'); // Decrement enrolled count
+    }
     // 5) Remove dropped enrollments
     Enrollment::where('student_id', $studentId)
         ->whereIn('section_id', $toRemove)
@@ -139,6 +142,8 @@ public function updateEnrollments($studentId, array $newSectionIds)
             'student_id' => $studentId,
             'section_id' => $sectionId,
         ]);
+        $section=CourseSection::find($sectionId);
+        $section->increment('current_enrollment');
     }
 
     // 7) Return updated list with resource
