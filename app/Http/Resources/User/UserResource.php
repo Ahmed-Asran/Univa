@@ -22,9 +22,8 @@ class UserResource extends JsonResource
             "username" => $this->username,
             "email" => $this->email,
             "student" => $this->whenLoaded('student', new StudentResource($this->student)),
-            "faculty" => $this->whenLoaded('faculty', function () {
-                return $this->faculty ? new FacultyResource($this->faculty) : null;
-            }),
+            "faculty" => $this->whenLoaded('faculty', new FacultyResource($this->faculty)),
+            
         ];
     }
 }

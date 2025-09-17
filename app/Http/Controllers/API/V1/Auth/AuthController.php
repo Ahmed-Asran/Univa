@@ -23,7 +23,7 @@ class AuthController extends Controller
         }
         log::info('Login successful');
         $token = $user->createToken('auth_token')->plainTextToken;
-       return  [new UserResource($user),
+       return  ['user'=>new UserResource($user),
         'token' => $token];
     }
     public function logout(Request $request)
