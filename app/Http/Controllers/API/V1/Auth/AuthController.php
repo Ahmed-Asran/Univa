@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use App\Notifications\NotificationHelper;
 
 class AuthController extends Controller
 {
@@ -23,6 +24,12 @@ class AuthController extends Controller
         }
         log::info('Login successful');
         $token = $user->createToken('auth_token')->plainTextToken;
+         NotificationHelper::notify(
+            [$user],
+            "you are welcome to our platform",
+            "now you can start using our platform",
+            ['email']
+        );
        return  ['user'=>new UserResource($user),
         'token' => $token];
     }

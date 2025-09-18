@@ -58,7 +58,7 @@ class Enrollment extends Model
 
 	public function course_section()
 	{
-		return $this->belongsTo(CourseSection::class, 'section_id');
+		return $this->belongsTo(CourseSection::class, 'section_id','section_id');
 	}
 
 	public function academic_record_versions()

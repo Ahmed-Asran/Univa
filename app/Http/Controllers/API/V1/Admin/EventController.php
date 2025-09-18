@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\API\V1\Admin;
 use App\Http\Controllers\Controller;
 use App\Services\EventService;
-use Illuminate\Console\Scheduling\Event;
 use Illuminate\Http\Request;
 
 class EventController extends Controller
