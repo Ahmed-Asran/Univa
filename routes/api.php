@@ -13,6 +13,7 @@ use App\Http\Controllers\API\V1\Faculty\MaterialController;
 use App\Http\Controllers\API\V1\Faculty\GradeUploadController;
 use App\Http\Controllers\API\V1\Admin\UploadCourseGradeController;
 use App\Http\Controllers\API\V1\Admin\AnnouncementController;
+use App\Http\Controllers\API\V1\Admin\EventController;
 Route::post('/users', [UserController::class, 'store'])->middleware(['api', 'auth:sanctum', 'role:admin']);
 Route::post('edit-user/{id}',[UserController::class, 'edit'])->middleware(['api', 'auth:sanctum', 'role:admin']);
 Route::post('delete-user/{id}',[UserController::class, 'delete'])->middleware(['api', 'auth:sanctum', 'role:admin']);
@@ -49,3 +50,8 @@ Route::get('announcement/{id}',[AnnouncementController::class,'getAnnouncement']
 Route::get('announcement/section/{courseSectionId}',[AnnouncementController::class,'getAnnouncementsForSection'])->middleware(['api','auth:sanctum']);
 Route::get('announcement-general',[AnnouncementController::class,'getAllGeneralAnnouncement'])->middleware(['api','auth:sanctum']);
 Route::get('announcement',[AnnouncementController::class,'index'])->middleware(['api','auth:sanctum']);
+Route::post('event-create',[EventController::class,'store'])->middleware(['api','auth:sanctum','role:admin']);
+Route::get('event',[EventController::class,'index'])->middleware(['api','auth:sanctum']);
+Route::get('event/{id}',[EventController::class,'show'])->middleware(['api','auth:sanctum']);
+Route::put('event/{id}',[EventController::class,'update'])->middleware(['api','auth:sanctum','role:admin']);
+Route::delete('event/{id}',[EventController::class,'destroy'])->middleware(['api','auth:sanctum','role:admin']);
