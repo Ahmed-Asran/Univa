@@ -10,6 +10,8 @@ use App\Http\Controllers\API\V1\Auth\AuthController;
 use App\Http\Controllers\API\V1\Auth\PasswardResetController;
 use App\Http\Controllers\API\V1\Student\ProfileContoller;
 use App\Http\Controllers\API\V1\Faculty\MaterialController;
+use App\Http\Controllers\API\V1\Faculty\GradeUploadController;
+use App\Http\Controllers\API\V1\Admin\UploadCourseGradeController;
 Route::post('/users', [UserController::class, 'store'])->middleware(['api', 'auth:sanctum', 'role:admin']);
 Route::post('edit-user/{id}',[UserController::class, 'edit'])->middleware(['api', 'auth:sanctum', 'role:admin']);
 Route::post('delete-user/{id}',[UserController::class, 'delete'])->middleware(['api', 'auth:sanctum', 'role:admin']);
@@ -37,3 +39,5 @@ Route::post('course/enrollments',[CreateEnrollmentController::class,'store'])->m
 Route::put('course/enrollments',[CreateEnrollmentController::class,'updateEnrollments'])->middleware(['api','auth:sanctum','role:student']);
 Route::get('course/all-enrollments/{Studentid}',[CreateEnrollmentController::class,'showallEnrollments'])->middleware(['api','auth:sanctum','role:student']);
 Route::get('course/current-enrollments/{Studentid}',[CreateEnrollmentController::class,'showCurrentEnrollments'])->middleware(['api','auth:sanctum','role:student']);
+Route::post('/assignments/{assignmentId}/grades/upload', [GradeUploadController::class, 'uploadAssignmentGrades'])->middleware(['api', 'auth:sanctum', 'role:faculty']);
+Route::post('course/grades/{courseSectionId}',[UploadCourseGradeController::class,'uploadCourseGrades'])->middleware(['api','auth:sanctum','role:admin']);
