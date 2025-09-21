@@ -36,6 +36,7 @@ Route::post('course-section-update/{id}',[CourseSectionControoler::class,'update
 Route::post('course-section-delete/{id}',[CourseSectionControoler::class,'destroy'])->middleware(['api','auth:sanctum','role:admin']);
 Route::get('course-sections-current',[CourseSectionControoler::class,'currentSections'])->middleware(['api','auth:sanctum','role:admin']);
 Route::post('courses/material-upload',[MaterialController::class,'uploadMaterial'])->middleware(['api','auth:sanctum','role:faculty']);
+Route::put('courses/material-update/{id}',[MaterialController::class,'updateAssignmentDate'])->middleware(['api','auth:sanctum','role:faculty']);
 Route::get('courses/materials/{sectionId}',[MaterialController::class,'getMaterials'])->middleware(['api','auth:sanctum','role:faculty,student']);
 Route::get('courses/material/{materialId}',[MaterialController::class,'getMaterial'])->middleware(['api','auth:sanctum','role:faculty,student']);
 Route::get('course/enrollments',[CreateEnrollmentController::class,'index'])->middleware(['api','auth:sanctum','role:student']);
