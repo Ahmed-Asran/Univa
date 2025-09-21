@@ -9,6 +9,7 @@ use App\Http\Requests\Users\CreateUserRequest;
 use App\Http\Requests\Users\UpdateUserRequest;
 use App\Http\Resources\User\UserResource;
 use Illuminate\Support\Facades\Log;
+use App\Notifications\NotificationHelper;
 
 class UserController extends Controller
 {
@@ -30,7 +31,8 @@ class UserController extends Controller
         try{
             log::info('Creating a new user' );
         $user = $this->userService->createUser($data);
-         
+       NotificationHelper::notify([$user], $user->name." you are welcome to our platform", "now you can start using our platform jest log it now with 
+        your username $user->username and password", ['email']);
         return new UserResource($user);
         }catch(\Exception $e){
             Log::error('Error creating user: ' . $e->getMessage());

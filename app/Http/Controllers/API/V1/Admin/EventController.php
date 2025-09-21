@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\API\V1\Admin;
 use App\Http\Controllers\Controller;
 use App\Services\EventService;
-use Illuminate\Console\Scheduling\Event;
 use Illuminate\Http\Request;
+use App\Notifications\NotificationHelper;
+use App\Models\User;
 
 class EventController extends Controller
 {
@@ -45,6 +46,8 @@ class EventController extends Controller
     $validated['created_by'] = $user->user_id;
 
     $event = $this->eventService->createEvent($validated);
+    $users = User::all(); // Get all users from the database.
+    NotificationHelper::notify($users, 'New event', 'A new event has been added: '.$event->title .$event->description);
 
     return response()->json($event, 201);
     }
