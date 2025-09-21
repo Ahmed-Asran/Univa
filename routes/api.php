@@ -14,6 +14,8 @@ use App\Http\Controllers\API\V1\Faculty\GradeUploadController;
 use App\Http\Controllers\API\V1\Admin\UploadCourseGradeController;
 use App\Http\Controllers\API\V1\Admin\AnnouncementController;
 use App\Http\Controllers\API\V1\Admin\EventController;
+use App\Http\Controllers\API\V1\Student\SupportTicketController as StudentSupportTicketController;
+use App\Http\Controllers\API\V1\Admin\SupportTicketController as AdminSupportTicketController;
 Route::post('/users', [UserController::class, 'store'])->middleware(['api', 'auth:sanctum', 'role:admin']);
 Route::post('edit-user/{id}',[UserController::class, 'edit'])->middleware(['api', 'auth:sanctum', 'role:admin']);
 Route::post('delete-user/{id}',[UserController::class, 'delete'])->middleware(['api', 'auth:sanctum', 'role:admin']);
@@ -55,3 +57,9 @@ Route::get('event',[EventController::class,'index'])->middleware(['api','auth:sa
 Route::get('event/{id}',[EventController::class,'show'])->middleware(['api','auth:sanctum']);
 Route::put('event/{id}',[EventController::class,'update'])->middleware(['api','auth:sanctum','role:admin']);
 Route::delete('event/{id}',[EventController::class,'destroy'])->middleware(['api','auth:sanctum','role:admin']);
+Route::post('support-tickets',[StudentSupportTicketController::class,'store'])->middleware(['api','auth:sanctum','role:student']);
+Route::get('my-support-tickets',[StudentSupportTicketController::class,'index'])->middleware(['api','auth:sanctum','role:student']);
+Route::get('my-support-tickets/{id}',[StudentSupportTicketController::class,'show'])->middleware(['api','auth:sanctum','role:student']);
+Route::put('support-tickets/{id}',[AdminSupportTicketController::class,'update'])->middleware(['api','auth:sanctum','role:admin']);
+Route::get('support-tickets/{id}',[AdminSupportTicketController::class,'show'])->middleware(['api','auth:sanctum','role:admin']);
+Route::get('support-tickets',[AdminSupportTicketController::class,'index'])->middleware(['api','auth:sanctum','role:admin']);
