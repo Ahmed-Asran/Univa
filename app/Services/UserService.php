@@ -184,7 +184,12 @@ class UserService
             if (!$user) {
                 throw new \Exception("User not found");
             }
+            if(!$user->is_deleted==false){
+                log::info("User is deleted");
+                throw new \Exception("User is does not exist");
+            }
             $username=$user->username;
+            log::info($username);
             if(strlen($username)==8){
                 $student=Student::where('student_id',$username)->first();
             }
@@ -193,10 +198,17 @@ class UserService
             }
            $user->update(array_intersect_key($data, array_flip(['email'])));
             if($student){
-                  $student->update(array_intersect_key($data, array_flip(['phone', 'address'])));
+               
+                   $student->update(array_intersect_key($data, array_flip(['phone', 'address'])));
             }
+            log::info($data);
+            log::info($faculty);
             if($faculty){
-               $faculty->update(array_intersect_key($data, array_flip(['department', 'position'])));
+               $faculty->update([
+                   'position' => $data['position']??$faculty->position,
+                   'department_id' => $data['department_id']??$faculty->department_id
+               ]);
+               log::info("updated faculty");
             }
            
             DB::commit();

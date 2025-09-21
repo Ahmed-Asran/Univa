@@ -24,6 +24,7 @@ class AuthController extends Controller
         }
         log::info('Login successful');
         $token = $user->createToken('auth_token')->plainTextToken;
+        $user->update(['is_active' => true]);
          NotificationHelper::notify(
             [$user],
             "you are welcome to our platform",
@@ -36,6 +37,10 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
+        $user = $request->user();
+        log::info($user);
+        $user->update(['is_active' => false]);
+        log::info($user->is_active);
         return response()->json(['message' => 'Successfully logged out']);
     }
 }   

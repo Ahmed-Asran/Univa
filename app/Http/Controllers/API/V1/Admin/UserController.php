@@ -44,6 +44,7 @@ class UserController extends Controller
     {
         log::info('Updating a user');
         $data = $request->validated();
+        log::info($data);
         try{
             $user = $this->userService->update($id,$data);
             return new UserResource($user);
