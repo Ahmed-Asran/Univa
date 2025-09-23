@@ -257,6 +257,30 @@ class UserService
             throw $e;
         }
     }
+    public function GetAllUsers(){
+        $users=User::where('is_deleted',0)->get();
+        return new UserResource($users->load('student','faculty'));
+    }
+    public function GetAllStudents(){
+        $users=User::where('is_deleted',false)
+        ->wherehas('student')->
+        with('student')->get();
+        log::info($users);
+        return new UserResource($users);
+    }
+    public function GetAllFaculties(){
+        log::info("Getting all faculties");
+        $users=User::where('is_deleted',0)->whereHas('faculty')->with('faculty')->get();
+        log::info($users);
+        return new UserResource($users);
+    }
+    public function GetUser($id){
+        $user=User::find($id);
+        if(!$user||$user->is_deleted==true){
+            throw new \Exception("User is not found ");
+        }
+        return new UserResource($user);
+    }
     
 
 }

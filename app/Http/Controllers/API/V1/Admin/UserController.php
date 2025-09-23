@@ -65,5 +65,48 @@ class UserController extends Controller
             return response()->json(['error' => $e->getMessage()], 400);
         }
     }
+    public function index()
+    {
+        log::info('Getting all users');
+        try{
+            $users = $this->userService->GetAllUsers();
+            
+            return UserResource::collection($users);
+        }catch(\Exception $e){
+            Log::error('Error getting users: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
+    public function getAllStudents(){
+        try{
+            $users = $this->userService->GetAllStudents();
+            return UserResource::collection($users);
+        }
+        catch(\Exception $e){
+            Log::error('Error getting users: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
+    public function GetAllFaculties(){
+        try{
+            $users= $this->userService->GetAllFaculties();
+            return UserResource::collection($users);
+        }
+        catch(\Exception $e){
+            Log::error('Error getting users: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
+    public function show($id)
+    {
+        log::info('Getting a user');
+        try{
+            $user = $this->userService->GetUser($id);
+            return new UserResource($user->load('student','faculty'));
+        }catch(\Exception $e){
+            Log::error('Error getting user: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
 }
 

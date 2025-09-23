@@ -19,6 +19,10 @@ use App\Http\Controllers\API\V1\Admin\SupportTicketController as AdminSupportTic
 Route::post('/users', [UserController::class, 'store'])->middleware(['api', 'auth:sanctum', 'role:admin']);
 Route::post('edit-user/{id}',[UserController::class, 'edit'])->middleware(['api', 'auth:sanctum', 'role:admin']);
 Route::post('delete-user/{id}',[UserController::class, 'delete'])->middleware(['api', 'auth:sanctum', 'role:admin']);
+Route::get('/users', [UserController::class, 'index'])->middleware(['api', 'auth:sanctum', 'role:admin']);
+Route::get('/users/students', [UserController::class, 'getAllStudents'])->middleware(['api', 'auth:sanctum', 'role:admin']);
+Route::get('/users/faculties', [UserController::class, 'GetAllFaculties'])->middleware(['api', 'auth:sanctum', 'role:admin']);
+Route::get('/users/{id}', [UserController::class, 'show'])->middleware(['api', 'auth:sanctum', 'role:admin']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout/{id}', [AuthController::class, 'logout'])->middleware(['api', 'auth:sanctum']);
 Route::post('/forget-password', [PasswardResetController::class, 'forget']);
