@@ -161,6 +161,9 @@ class CourseService
     if (!$courseSection) {
         throw new \Exception('Course Section not found');
     }
+    if ($courseSection->is_deleted) {
+        throw new \Exception('Course Section is inactive or deleted');
+    }
 
     // Update section base fields
     $courseSection->update([
