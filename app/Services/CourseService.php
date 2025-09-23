@@ -5,6 +5,7 @@ use App\Models\ClassSchedule;
 use App\Models\Course;
 use Illuminate\Support\Facades\Log as log;
 use App\Models\CourseSection;
+use App\Models\CoursePrerequisite;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Exceptions\HttpResponseException;
 class CourseService
@@ -100,6 +101,7 @@ class CourseService
         if ($course->is_deleted) {
             throw new \Exception('Course is already deleted');
         }
+        $pre=CoursePrerequisite::where('prerequisite_course_id',$id)->orWhere('course_id',$id)->delete();
         $course->is_deleted = 1;
         $course->is_active = 0;
         $course->save();
