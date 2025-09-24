@@ -19,7 +19,7 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
         $user=User::where('username', $request->username)->firstOrFail();
-        if(!$user||!hash::check($request->password, $user->password_hash) ){
+        if(!$user||!$user->is_deleted==1||!hash::check($request->password, $user->password_hash) ){
             return response()->json(['message' => 'The provided credentials are incorrect.'], 401);
         }
         log::info('Login successful');
