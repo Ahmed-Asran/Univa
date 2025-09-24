@@ -20,7 +20,7 @@ class AuthController extends Controller
         ]);
         $user=User::where('username', $request->username)->firstOrFail();
         if(!$user||$user->is_deleted||!hash::check($request->password, $user->password_hash) ){
-            return response()->json(['message' => 'The provided credentials are incorrect.'], 401);
+            return response()->json(['message' => 'The provided credentials are incorrect.'], 400);
         }
         log::info('Login successful');
         $token = $user->createToken('auth_token')->plainTextToken;
