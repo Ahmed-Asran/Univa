@@ -43,12 +43,14 @@ class UserService
         $last = User::whereHas('roles', function ($q) {
             $q->where('role_name', 'admin');
         })
-            ->where('user_id', '>=', 200000)
-            ->where('user_id', '<', 300000)
-            ->orderBy('user_id', 'desc')
+            ->where('username', '>=', 200000)
+            ->where('username', '<', 300000)
+            ->orderBy('username', 'desc')
             ->first();
+            log::info($last);
 
-        $lastNumber = $last ? (int)$last->user_id : 199999;
+        $lastNumber = $last ? (int)$last->username : 199999;
+        log::info($lastNumber);
         return (string)($lastNumber + 1);
     }
         return null;
