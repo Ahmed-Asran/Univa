@@ -41,3 +41,5 @@ Route::get('course/all-enrollments/{Studentid}',[CreateEnrollmentController::cla
 Route::get('course/current-enrollments/{Studentid}',[CreateEnrollmentController::class,'showCurrentEnrollments'])->middleware(['api','auth:sanctum','role:student']);
 Route::post('/assignments/{assignmentId}/grades/upload', [GradeUploadController::class, 'uploadAssignmentGrades'])->middleware(['api', 'auth:sanctum', 'role:faculty']);
 Route::post('course/grades/{courseSectionId}',[UploadCourseGradeController::class,'uploadCourseGrades'])->middleware(['api','auth:sanctum','role:admin']);
+Route::get('course/grades/{courseSectionId}',[UploadCourseGradeController::class,'getGradesforSection'])->middleware(['api','auth:sanctum','role:admin,faculty,student']);
+Route::get('course/grades/student/{studentId}',[UploadCourseGradeController::class,'getGradesforStudent'])->middleware(['api','auth:sanctum']);

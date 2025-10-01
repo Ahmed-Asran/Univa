@@ -223,5 +223,35 @@ $newPointgrade = $newPoint * $newCreditHours;
 $gpa = ($currentPointgrade + $newPointgrade) / ($oldCreditHours + $newCreditHours);
 return $gpa;
 }
+public function getGradesForSection($sectionId) {
+    try{
+    $grades=Enrollment::with('student.user','course_section.course')
+   ->where('section_id',$sectionId)
+   ->get();
+   return $grades;
+        
+    }catch(\Exception $e){
+        Log::error('Error fetching grades for section: '.$e->getMessage());
+        throw new HttpResponseException(response()->json([
+            'success' => false,
+            'message' => 'Error fetching grades for section',
+        ], 500));
+    }
 
+}
+public function getGradesForStudent($studentId) {
+    try{
+    $grades=Enrollment::with('course_section.course','student.user')
+   ->where('student_id',$studentId)
+   ->get();
+   return $grades;
+        
+    }catch(\Exception $e){
+        Log::error('Error fetching grades for student: '.$e->getMessage());
+        throw new HttpResponseException(response()->json([
+            'success' => false,
+            'message' => 'Error fetching grades for student',
+        ], 500));
+    }
+}
 }
