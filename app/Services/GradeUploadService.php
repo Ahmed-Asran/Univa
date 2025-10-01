@@ -178,7 +178,6 @@ class GradeUploadService{
                 'enrollment_id' => $enrollment->enrollment_id
             ];
         }
-
         // Insert/update grades
         DB::transaction(function () use ($grades) {
             
@@ -189,10 +188,15 @@ class GradeUploadService{
                 $enrollment->status = 'Completed';
                 $enrollment->save();
                 $student = Student::find($g['student_id']);
+                $total_credits = $student->total_credits;
+                $enrollments=$student->enrollments()->where('status','Completed')->with('course_section.course')->get();
+                if($enrollment->final_grade!='F'){
+                    $total_credits += $enrollment->course_section->course->credit_hours;
+                }
                 $student->update([
-                    'total_credits' => $student->total_credits + $enrollment->course_section->course->credit_hours,
+                    'total_credits' => $total_credits,
                     //edit gpa here
-                    'current_gpa' => $this->calcGPA($student->current_gpa,$student->total_credits,$enrollment->course_section->course->credit_hours,$g['points_earned']) 
+                    'current_gpa' => $this->calcGPA($enrollments) 
                 ]);
             }
                 
@@ -217,11 +221,100 @@ class GradeUploadService{
     if ($grade >= 50) return ['D', 2.0];
     return ['F', 0.0];
 }
-private function calcGPA($oldGPA,$oldCreditHours,$newCreditHours,$newPoint) {
-$currentPointgrade = $oldGPA * $oldCreditHours;
-$newPointgrade = $newPoint * $newCreditHours;
-$gpa = ($currentPointgrade + $newPointgrade) / ($oldCreditHours + $newCreditHours);
-return $gpa;
+private function calcGPA($enrollments) {
+    $totalPoints = 0;
+    $totalCredits = 0;
+
+    foreach ($enrollments as $enrollment) {
+        if ($enrollment->final_grade && $enrollment->course_section && $enrollment->course_section->course) {
+            [$alphaGrade, $points] = $this->convertToLetterAndPoints($enrollment->result);
+            $credits = $enrollment->course_section->course->credit_hours;
+
+            $totalPoints += $points * $credits;
+            $totalCredits += $credits;
+        }
+    }
+
+    return $totalCredits > 0 ? round($totalPoints / $totalCredits, 2) : 0.0;
+}
+public function getGradesForSection($sectionId) {
+    try{
+    $grades=Enrollment::with('student.user','course_section.course')
+   ->where('section_id',$sectionId)
+   ->get();
+   return $grades;
+        
+    }catch(\Exception $e){
+        Log::error('Error fetching grades for section: '.$e->getMessage());
+        throw new HttpResponseException(response()->json([
+            'success' => false,
+            'message' => 'Error fetching grades for section',
+        ], 500));
+    }
+
+}
+public function getGradesForStudent($studentId) {
+    try{
+    $grades=Enrollment::with('course_section.course','student.user')
+   ->where('student_id',$studentId)
+   ->get();
+   return $grades;
+        
+    }catch(\Exception $e){
+        Log::error('Error fetching grades for student: '.$e->getMessage());
+        throw new HttpResponseException(response()->json([
+            'success' => false,
+            'message' => 'Error fetching grades for student',
+        ], 500));
+    }
 }
 
+public function editGrade($enrollment, $grade)
+{
+    try {
+        [$AlphaGrade, $pointsEarned] = $this->convertToLetterAndPoints($grade);
+
+        // check if grade was previously null (first time grading)
+        $isFirstTimeGrade = is_null($enrollment->result);
+        $oldTotalCredits = $enrollment->student->total_credits;
+        $oldgrade = $enrollment->final_grade;
+        // update enrollment grade
+        $enrollment->result = $grade;
+        $enrollment->final_grade = $AlphaGrade;
+        $enrollment->save();
+
+        // get student and their completed enrollments
+        $student = Student::find($enrollment->student_id);
+        $enrollments = $student->enrollments()
+            ->where('status', 'Completed')
+            ->with('course_section.course')
+            ->get();
+
+        // update total credits only if this is the first time grade is being added
+        $totalCredits = $student->total_credits;
+        if ($isFirstTimeGrade) {
+            $totalCredits += $enrollment->course_section->course->credit_hours;
+        }
+        else if($oldgrade!='F' && $AlphaGrade=='F'){
+            $totalCredits -= $enrollment->course_section->course->credit_hours;
+        }
+        else if($oldgrade=='F' && $AlphaGrade!='F'){
+            $totalCredits += $enrollment->course_section->course->credit_hours;
+        }
+
+        // update student record
+        $student->update([
+            'total_credits' => $totalCredits,
+            'current_gpa'   => $this->calcGPA($enrollments)
+        ]);
+
+        return $enrollment;
+    } catch (\Exception $e) {
+        Log::error('Error editing grade: ' . $e->getMessage());
+        throw new HttpResponseException(response()->json([
+            'success' => false,
+            'message' => 'Error editing grade',
+        ], 500));
+    }
+}
 }

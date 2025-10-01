@@ -50,6 +50,9 @@ Route::get('course/all-enrollments/{Studentid}',[CreateEnrollmentController::cla
 Route::get('course/current-enrollments/{Studentid}',[CreateEnrollmentController::class,'showCurrentEnrollments'])->middleware(['api','auth:sanctum','role:student']);
 Route::post('/assignments/{assignmentId}/grades/upload', [GradeUploadController::class, 'uploadAssignmentGrades'])->middleware(['api', 'auth:sanctum', 'role:faculty']);
 Route::post('course/grades/{courseSectionId}',[UploadCourseGradeController::class,'uploadCourseGrades'])->middleware(['api','auth:sanctum','role:admin']);
+Route::get('course/grades/{courseSectionId}',[UploadCourseGradeController::class,'getGradesforSection'])->middleware(['api','auth:sanctum','role:admin,faculty,student']);
+Route::get('course/grades/student/{studentId}',[UploadCourseGradeController::class,'getGradesforStudent'])->middleware(['api','auth:sanctum']);
+Route::put('course/grades/{studentId}/{sectionId}',[UploadCourseGradeController::class,'editGrade'])->middleware(['api','auth:sanctum','role:admin']);
 Route::post('announcement/create',[AnnouncementController::class,'store'])->middleware(['api','auth:sanctum','role:admin,faculty']);
 Route::put('announcement/update/{id}',[AnnouncementController::class,'edit'])->middleware(['api','auth:sanctum','role:admin,faculty']);
 Route::delete('announcement/delete/{id}',[AnnouncementController::class,'destroy'])->middleware(['api','auth:sanctum','role:admin,faculty']);
@@ -68,3 +71,4 @@ Route::get('my-support-tickets/{id}',[StudentSupportTicketController::class,'sho
 Route::put('support-tickets/{id}',[AdminSupportTicketController::class,'update'])->middleware(['api','auth:sanctum','role:admin']);
 Route::get('support-tickets/{id}',[AdminSupportTicketController::class,'show'])->middleware(['api','auth:sanctum','role:admin']);
 Route::get('support-tickets',[AdminSupportTicketController::class,'index'])->middleware(['api','auth:sanctum','role:admin']);
+
