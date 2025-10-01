@@ -96,4 +96,23 @@ class MatrailUploadfileService
             throw new \Exception('Failed to fetch material');
         }
     }
+    public function updateAssignmentDate($AssignmentId, $data)
+    {
+        try {
+            log::info('Updating Assignment or exam dates ', ['assignment_id' => $AssignmentId]);
+            $Assignment = Assignment::findOrFail($AssignmentId);
+            log::info('Assignment or Exam found', ['Assignment' => $Assignment]);
+            if($Assignment){
+                $Assignment->update([
+                    'due_date' => $data['due_date'],
+                    'description' => $data['description']??$Assignment->description,
+                ]);
+                log::info('Assignment or Exam dates updated successfully', ['Assignment' => $Assignment]);
+                return $Assignment;
+            }
+        } catch (\Exception $e) {
+            log::error('Database error: ' . $e->getMessage());
+            throw new \Exception('Failed to update Assignment or Exam dates or not found');
+        }
+    }
 }

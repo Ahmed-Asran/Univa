@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use App\Notifications\NotificationHelper;
 
 class AuthController extends Controller
 {
@@ -18,17 +19,28 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
         $user=User::where('username', $request->username)->firstOrFail();
-        if(!$user||!hash::check($request->password, $user->password_hash) ){
-            return response()->json(['message' => 'The provided credentials are incorrect.'], 401);
+        if(!$user||$user->is_deleted||!hash::check($request->password, $user->password_hash) ){
+            return response()->json(['message' => 'The provided credentials are incorrect.'], 400);
         }
         log::info('Login successful');
         $token = $user->createToken('auth_token')->plainTextToken;
+        $user->update(['is_active' => true]);
+         NotificationHelper::notify(
+            [$user],
+            "you are welcome to our platform",
+            "now you can start using our platform",
+            ['email']
+        );
        return  ['user'=>new UserResource($user),
         'token' => $token];
     }
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
+        $user = $request->user();
+        log::info($user);
+        $user->update(['is_active' => false]);
+        log::info($user->is_active);
         return response()->json(['message' => 'Successfully logged out']);
     }
 }   

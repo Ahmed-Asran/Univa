@@ -43,12 +43,14 @@ class UserService
         $last = User::whereHas('roles', function ($q) {
             $q->where('role_name', 'admin');
         })
-            ->where('user_id', '>=', 200000)
-            ->where('user_id', '<', 300000)
-            ->orderBy('user_id', 'desc')
+            ->where('username', '>=', 200000)
+            ->where('username', '<', 300000)
+            ->orderBy('username', 'desc')
             ->first();
+            log::info($last);
 
-        $lastNumber = $last ? (int)$last->user_id : 199999;
+        $lastNumber = $last ? (int)$last->username : 199999;
+        log::info($lastNumber);
         return (string)($lastNumber + 1);
     }
         return null;
@@ -184,7 +186,12 @@ class UserService
             if (!$user) {
                 throw new \Exception("User not found");
             }
+            if(!$user->is_deleted==false){
+                log::info("User is deleted");
+                throw new \Exception("User is does not exist");
+            }
             $username=$user->username;
+            log::info($username);
             if(strlen($username)==8){
                 $student=Student::where('student_id',$username)->first();
             }
@@ -193,10 +200,17 @@ class UserService
             }
            $user->update(array_intersect_key($data, array_flip(['email'])));
             if($student){
-                  $student->update(array_intersect_key($data, array_flip(['phone', 'address'])));
+               
+                   $student->update(array_intersect_key($data, array_flip(['phone', 'address'])));
             }
+            log::info($data);
+            log::info($faculty);
             if($faculty){
-               $faculty->update(array_intersect_key($data, array_flip(['department', 'position'])));
+               $faculty->update([
+                   'position' => $data['position']??$faculty->position,
+                   'department_id' => $data['department_id']??$faculty->department_id
+               ]);
+               log::info("updated faculty");
             }
            
             DB::commit();
@@ -244,6 +258,30 @@ class UserService
             Log::error('Stack trace: ' . $e->getTraceAsString());
             throw $e;
         }
+    }
+    public function GetAllUsers(){
+        $users=User::where('is_deleted',0)->get();
+        return new UserResource($users->load('student','faculty'));
+    }
+    public function GetAllStudents(){
+        $users=User::where('is_deleted',false)
+        ->wherehas('student')->
+        with('student')->get();
+        log::info($users);
+        return new UserResource($users);
+    }
+    public function GetAllFaculties(){
+        log::info("Getting all faculties");
+        $users=User::where('is_deleted',0)->whereHas('faculty')->with('faculty')->get();
+        log::info($users);
+        return new UserResource($users);
+    }
+    public function GetUser($id){
+        $user=User::find($id);
+        if(!$user||$user->is_deleted==true){
+            throw new \Exception("User is not found ");
+        }
+        return new UserResource($user);
     }
     
 

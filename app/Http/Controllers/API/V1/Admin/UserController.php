@@ -9,6 +9,7 @@ use App\Http\Requests\Users\CreateUserRequest;
 use App\Http\Requests\Users\UpdateUserRequest;
 use App\Http\Resources\User\UserResource;
 use Illuminate\Support\Facades\Log;
+use App\Notifications\NotificationHelper;
 
 class UserController extends Controller
 {
@@ -30,7 +31,8 @@ class UserController extends Controller
         try{
             log::info('Creating a new user' );
         $user = $this->userService->createUser($data);
-         
+       NotificationHelper::notify([$user], $user->name." you are welcome to our platform", "now you can start using our platform jest log it now with 
+        your username $user->username and password", ['email']);
         return new UserResource($user);
         }catch(\Exception $e){
             Log::error('Error creating user: ' . $e->getMessage());
@@ -42,6 +44,7 @@ class UserController extends Controller
     {
         log::info('Updating a user');
         $data = $request->validated();
+        log::info($data);
         try{
             $user = $this->userService->update($id,$data);
             return new UserResource($user);
@@ -59,6 +62,49 @@ class UserController extends Controller
             return response()->json(['message' => 'User deleted successfully'], 200);
         }catch(\Exception $e){
             Log::error('Error deleting user: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
+    public function index()
+    {
+        log::info('Getting all users');
+        try{
+            $users = $this->userService->GetAllUsers();
+            
+            return UserResource::collection($users);
+        }catch(\Exception $e){
+            Log::error('Error getting users: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
+    public function getAllStudents(){
+        try{
+            $users = $this->userService->GetAllStudents();
+            return UserResource::collection($users);
+        }
+        catch(\Exception $e){
+            Log::error('Error getting users: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
+    public function GetAllFaculties(){
+        try{
+            $users= $this->userService->GetAllFaculties();
+            return UserResource::collection($users);
+        }
+        catch(\Exception $e){
+            Log::error('Error getting users: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
+    public function show($id)
+    {
+        log::info('Getting a user');
+        try{
+            $user = $this->userService->GetUser($id);
+            return new UserResource($user->load('student','faculty'));
+        }catch(\Exception $e){
+            Log::error('Error getting user: ' . $e->getMessage());
             return response()->json(['error' => $e->getMessage()], 400);
         }
     }

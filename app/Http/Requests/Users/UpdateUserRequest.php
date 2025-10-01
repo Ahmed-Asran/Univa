@@ -28,11 +28,11 @@ class UpdateUserRequest extends FormRequest
             "email" => ["sometimes", "string", "email", "max:255",Rule::unique('users', 'email')->ignore($this->route('id'), 'user_id'),],
             'phone' => [
             'sometimes','string',
-            Rule::unique('students','phone')->ignore($this->student_id, 'id')
+            Rule::unique('students','phone')->ignore($this->student_id, 'student_id')
         ],
             "address" => ["nullable", "string", "max:255"], 
             "position"=>["nullable", "string", "max:255"], 
-            "department"=>["nullable", "string", "max:255","exists:departments,id"], 
+            "department_id"=>["nullable", "string", "max:255","exists:department,department_id"], 
         ];
     }
     public function messages(){
@@ -43,7 +43,7 @@ class UpdateUserRequest extends FormRequest
     }
     protected function passedValidation()
 {
-    log::info('Validation passed for CreateUserRequest', $this->validated());
+    log::info('Validation passed for updateUserRequest', $this->validated());
 }
 protected function failedValidation(Validator $validator)
 {

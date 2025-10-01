@@ -20,9 +20,14 @@ class Coursecontroller extends Controller
 
     public function store(CreateCourseRequest $request)
     {
-        $data = $request->validated();
-        $course = $this->courseService->createCourse($data);
-        return new CourseResource($course);
+        try{
+            $data = $request->validated();
+            $course = $this->courseService->createCourse($data);
+            return new CourseResource($course);
+        }
+        catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
     }
     public function index()
     {
@@ -31,18 +36,32 @@ class Coursecontroller extends Controller
     }  
     public function show($id)
     {
-        $course = $this->courseService->getCourseById($id);
+        try{
+              $course = $this->courseService->getCourseById($id);
         return new CourseResource($course);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 404);
+        }
+      
     }  
     public function update(UpdatecourseRequest $request, $id)
     {
-        $data = $request->all();
-        $course = $this->courseService->updateCourse($id, $data);
-        return new CourseResource($course);
+        try {
+            $data = $request->validated();
+            $course = $this->courseService->updateCourse($id, $data);
+            return new CourseResource($course);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
     }
     public function destroy($id)
     {
-        $this->courseService->deleteCourse($id);
-        return response()->json(['message' => 'Course deleted successfully']);
+        try {
+            $this->courseService->deleteCourse($id);
+             return response()->json(['message' => 'Course deleted successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 404);
+        }
+       
     }
 }

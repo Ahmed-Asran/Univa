@@ -86,4 +86,24 @@ class MaterialController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+    public function updateAssignmentDate($AssignmentId, Request $request)
+    {
+        
+        log::info('Update assignment date request received', ['Assignment_id' => $AssignmentId]);
+        if (!auth()->check() || !auth()->user()->hasRole('faculty')) {
+            return response()->json(['error' => ' you are Unauthorized'], 401);
+        }
+        $data=$request->validate([
+            'due_date' => 'required|date|after_or_equal:today',
+            'description' => 'sometimes|string',
+        ]);
+        log::info('Validation passed');
+        try {
+            $Assignment = $this->matrailUploadfile->updateAssignmentDate($AssignmentId, $request->all());
+            log::info('Assignment date updated', ['Assignment' => $Assignment]);
+            return response()->json(['data' => $Assignment], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 404);
+        }
+    }
 }
