@@ -2,16 +2,20 @@
 namespace App\Services;
 
 use App\Models\SupportTicket;
+use Illuminate\Support\Facades\Log;
 
 class SupportTicketService
 {
     public function createSupportTicket($data)
     {
-        return SupportTicket::create([
+        $supportTicket= SupportTicket::create([
             'description'=>$data['description'],
             'student_id'=>$data['student_id'],
             'subject'=>$data['subject'],
+            'category'=>$data['category'] ?? 'General',
         ]);
+        log::info('Support Ticket Created in Service: ', $supportTicket->toArray());
+        return $supportTicket;
     }
     public function getSupportTicket($id)
     {

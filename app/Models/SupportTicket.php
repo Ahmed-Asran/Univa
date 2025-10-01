@@ -40,7 +40,8 @@ class SupportTicket extends Model
 		'subject',
 		'description',
 		'status',
-		'resolved_at'
+		'resolved_at',
+		'category'
 	];
 
 	public function student()

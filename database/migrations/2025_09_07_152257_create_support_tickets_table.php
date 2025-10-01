@@ -18,7 +18,8 @@ return new class extends Migration
             $table->text('description');
             $table->enum('status', ['Open', 'In Progress', 'Resolved', 'Closed'])->nullable()->default('Open');
             $table->timestamp('created_at')->useCurrent()->index('idx_created_at');
-            $table->timestamp('resolved_at')->default('0000-00-00 00:00:00');
+            $table->timestamp('resolved_at')->nullable();
+            $table->enum('category', ['Technical Issue', 'Academic', 'General'])->nullable()->default('Medium')->index('idx_priority')->default('General');
 
             $table->index(['student_id', 'status'], 'idx_student_id_status');
         });
